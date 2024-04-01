@@ -78,10 +78,10 @@ If you wish to skip training, you can download the pretrained models from the ne
 ### Pretrained models
 
 - CTC: [akreal/bloomzmms-ctc](https://huggingface.co/akreal/bloomzmms-ctc)
-- AED:
-  - T: [akreal/bloomzmms-aed-t](https://huggingface.co/akreal/bloomzmms-aed-t)
-  - MI: [akreal/bloomzmms-aed-mi](https://huggingface.co/akreal/bloomzmms-aed-mi)
-  - TMI: [akreal/bloomzmms-aed-tmi](https://huggingface.co/akreal/bloomzmms-aed-tmi)
+- CE:
+  - T: [akreal/bloomzmms-ce-t](https://huggingface.co/akreal/bloomzmms-ce-t)
+  - MI: [akreal/bloomzmms-ce-mi](https://huggingface.co/akreal/bloomzmms-ce-mi)
+  - TMI: [akreal/bloomzmms-ce-tmi](https://huggingface.co/akreal/bloomzmms-ce-tmi)
 
 ## Speech Recognition Inference
 
