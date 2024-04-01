@@ -1,0 +1,104 @@
+diff --git a/Preprocessing/TextFrontend.py b/Preprocessing/TextFrontend.py
+index bfecd179..2b26550f 100644
+--- a/Preprocessing/TextFrontend.py
++++ b/Preprocessing/TextFrontend.py
+@@ -8,6 +8,7 @@ import torch
+ from dragonmapper.transcriptions import pinyin_to_ipa
+ from phonemizer.backend import EspeakBackend
+ from pypinyin import pinyin
++from tn.chinese.normalizer import Normalizer
+ 
+ from Preprocessing.articulatory_features import generate_feature_table
+ from Preprocessing.articulatory_features import get_feature_to_index_lookup
+@@ -136,7 +137,7 @@ class ArticulatoryCombinedTextFrontend:
+ 
+         elif language == "cmn":
+             self.g2p_lang = "cmn"  # we don't use espeak for this case
+-            self.expand_abbreviations = convert_kanji_to_pinyin_mandarin
++            self.expand_abbreviations = lambda x: x
+             if not silent:
+                 print("Created a Mandarin-Chinese Text-Frontend")
+ 
+@@ -159,8 +160,10 @@ class ArticulatoryCombinedTextFrontend:
+                 print("Created a Farsi Text-Frontend")
+ 
+         else:
+-            print("Language not supported yet")
+-            sys.exit()
++            self.g2p_lang = language
++            self.expand_abbreviations = lambda x: x
++            if not silent:
++                print(f"Created a {language} Text-Frontend")
+ 
+         # remember to also update get_language_id() below when adding something here, as well as the get_example_sentence function
+ 
+@@ -170,6 +173,13 @@ class ArticulatoryCombinedTextFrontend:
+                                                     preserve_punctuation=True,
+                                                     language_switch='remove-flags',
+                                                     with_stress=self.use_stress)
++        else:
++            self.phonemizer_backend = EspeakBackend(language='en-us',
++                                                    punctuation_marks=';:,.!?¡¿—…"«»“”~/。【】、‥،؟“”؛',
++                                                    preserve_punctuation=True,
++                                                    language_switch='remove-flags',
++                                                    with_stress=self.use_stress)
++            self.normalizer = Normalizer()
+ 
+         self.phone_to_vector = generate_feature_table()
+         self.phone_to_id = get_phone_to_id()
+@@ -293,7 +303,18 @@ class ArticulatoryCombinedTextFrontend:
+ 
+         # phonemize
+         if self.g2p_lang == "cmn-latn-pinyin" or self.g2p_lang == "cmn":
+-            phones = pinyin_to_ipa(utt)
++            normalized_utt = self.normalizer.normalize(utt)
++            parts = re.split("([A-zÀ-ÿ]+)", normalized_utt)
++            phonemized_parts = []
++            for part in parts:
++                if part.isascii():
++                    phonemized_part = self.phonemizer_backend.phonemize([part], strip=True)
++                    if len(phonemized_part) > 0:
++                        phonemized_parts.append(phonemized_part[0])
++                else:
++                    pinyin_part = " ".join([x[0] for x in pinyin(part)])
++                    phonemized_parts.append(pinyin_to_ipa(pinyin_part))
++            phones = " ".join(phonemized_parts)
+         else:
+             phones = self.phonemizer_backend.phonemize([utt], strip=True)[0]  # To use a different phonemizer, this is the only line that needs to be exchanged
+ 
+@@ -522,6 +543,8 @@ def get_language_id(language):
+         return torch.LongTensor([16])
+     elif language == "pt-br":
+         return torch.LongTensor([17])
++    else:
++        return torch.LongTensor([0])
+ 
+ 
+ if __name__ == '__main__':
+diff --git a/run_sentences_to_file_reader.py b/run_sentences_to_file_reader.py
+new file mode 100644
+index 00000000..2c29604e
+--- /dev/null
++++ b/run_sentences_to_file_reader.py
+@@ -0,0 +1,21 @@
++import os
++import sys
++import torch
++
++from InferenceInterfaces.ToucanTTSInterface import ToucanTTSInterface
++
++language = sys.argv[1]
++
++tts = ToucanTTSInterface(device="cuda", tts_model_path="Meta", faster_vocoder=False)
++tts.set_language(language)
++
++i = 0
++
++odir = f"audios/{language}"
++os.makedirs(odir, exist_ok=True)
++
++with open(f"../sentences_{language}.txt", encoding="utf-8") as f:
++    for l in f:
++        filename = f"{odir}/xnli_validation_{i:04d}.wav"
++        tts.read_to_file(text_list=[l.strip("\n")], file_location=filename)
++        i += 1

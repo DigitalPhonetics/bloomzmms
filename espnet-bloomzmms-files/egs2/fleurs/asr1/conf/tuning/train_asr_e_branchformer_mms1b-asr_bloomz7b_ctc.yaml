@@ -1,0 +1,85 @@
+# Trained with RTX A6000 (48 GB) x 2 GPUs, 13 hours per epoch.
+encoder: e_branchformer
+encoder_conf:
+    output_size: 1024
+    attention_heads: 8
+    attention_layer_type: rel_selfattn
+    pos_enc_layer_type: rel_pos
+    rel_pos_type: latest
+    cgmlp_linear_units: 8192
+    cgmlp_conv_kernel: 31
+    use_linear_after_conv: false
+    gate_activation: identity
+    num_blocks: 17
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.1
+    input_layer: conv2d
+    layer_drop_rate: 0.1
+    linear_units: 2048
+    positionwise_layer_type: linear
+    macaron_ffn: true
+    use_ffn: true
+    merge_conv_kernel: 31
+    interctc_layer_idx: [3]
+    interctc_use_conditioning: true
+
+postencoder: hugging_face_transformers
+postencoder_conf:
+    model_name_or_path: "dummy"
+    length_adaptor_n_layers: 1
+    output_size: 4096
+
+#use_amp: true
+unused_parameters: true
+optim: adam
+batch_type: length
+batch_bins: 7000000
+num_iters_per_epoch: 23364
+optim_conf:
+    lr: 0.0001
+    weight_decay: 0.000001
+scheduler: warmuplr     # pytorch v1.1.0+ required
+scheduler_conf:
+    warmup_steps: 25000
+max_epoch: 70
+patience: 3
+
+freeze_param: [
+    "frontend.upstream",
+    "ctc",
+]
+
+frontend: s3prl
+frontend_conf:
+    frontend_conf:
+        upstream: wav2vec2_custom  # Note: If the upstream is changed, please change the input_size in the preencoder.
+        path_or_url: downloads/converted_mms1b_all.pt
+    download_dir: hub
+    multilayer_feature: True
+
+preencoder: linear
+preencoder_conf:
+    input_size: 1280  # Note: If the upstream is changed, please change this value accordingly.
+    output_size: 128
+
+ctc_conf:
+    bias: false
+
+model_conf:
+    ctc_weight: 1.0
+    interctc_weight: 0.2
+    aux_ctc:
+        '3': utt2lid_token
+    extract_feats_in_collect_stats: false   # Note: "False" means during collect stats (stage 10), generating dummy stats files rather than extract_feats by forward frontend.
+    # BLOOMZ dictionary customizations
+    ignore_id: 3
+    sym_blank: "<pad>"
+    sym_sos: "<s>"
+    sym_eos: "</s>"
+
+best_model_criterion:
+-   - valid
+    - cer_ctc
+    - min
+keep_nbest_models: 1

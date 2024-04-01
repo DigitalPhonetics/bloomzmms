@@ -1,0 +1,4 @@
+hugging_face_decoder: True
+hugging_face_decoder_conf:
+    num_beams: 5
+    max_new_tokens: 192

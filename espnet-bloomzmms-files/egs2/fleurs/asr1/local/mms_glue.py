@@ -1,0 +1,60 @@
+task2list = {
+    "mnli_matched": [
+        "%premise",
+        ' \n\nQuestion: Does this imply that "',
+        "%hypothesis",
+        '"? Yes, no, or maybe?',
+    ],
+    "mnli_mismatched": [
+        "%premise",
+        ' \n\nQuestion: Does this imply that "',
+        "%hypothesis",
+        '"? Yes, no, or maybe?',
+    ],
+    "cola": ["%sentence", "\nIs this example grammatically correct and sensible?"],
+    "sst2": [
+        "Does the following sentence have a positive or negative sentiment?\n",
+        "%sentence",
+    ],
+    "mrpc": [
+        "Does the sentence\n",
+        "%sentence1",
+        "\nparaphrase (that is, mean the same thing as) this sentence?\n",
+        "%sentence2",
+    ],
+    "qqp": [
+        "I'm an administrator on the website Quora. There are two posts, one that asks \"",
+        "%question1",
+        '" and another that asks "',
+        "%question2",
+        '". I can merge questions if they are asking the same thing. Can I merge these two questions?',
+    ],
+    "stsb": [
+        "I need to know how similar these two passages are:\n- ",
+        "%sentence1",
+        "\n- ",
+        "%sentence2",
+        "\n\nQuestion: Can you give me a number from 0.0 to 5.0 that denotes how similar they are, where 0.0 means totally dissimilar and 5.0 means extremely similar?\nAnswer:",
+    ],
+    "qnli": [
+        'Does knowing that "',
+        "%sentence",
+        '" imply that I know the answer to "',
+        "%question",
+        '"',
+    ],
+    "rte": [
+        'Does the claim "',
+        "%sentence2",
+        '" follow from the fact that "',
+        "%sentence1",
+        '"? Please answer either yes or no.',
+    ],
+    "wnli": [
+        "If it's true that\n",
+        "%sentence1",
+        "\nhow confident should I be that\n",
+        "%sentence2",
+        "\nvery confident or not confident?",
+    ],
+}
