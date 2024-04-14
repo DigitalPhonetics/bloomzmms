@@ -47,6 +47,24 @@ log "Combining FLEURS and Common Voice training data"
 utils/combine_data.sh data/train_t data/train_fleurs data/train_cv
 
 log "Exporting BLOOMZ token embeddings"
+
 python local/export_hf_embed_tokens.py bigscience/bloomz-7b1 downloads/bloomz_token_embeddings.pth
+
+log "Preparing VoxPopuli data"
+
+for lang in cs de en es et fi fr hr hu it lt nl pl ro sk sl; do
+    python local/prepare_voxpopuli.py ${VOXPOPULI}/root/transcriped_data/${lang} data/test_voxpopuli_${lang}
+done
+
+log "Preparing Mutlilingual LibriSpeech data"
+
+python ../../mls/asr1/local/data_prep.py --lang de --source ${MLS}/mls_german
+python ../../mls/asr1/local/data_prep.py --lang en --source ${MLS}/mls_english
+python ../../mls/asr1/local/data_prep.py --lang es --source ${MLS}/mls_spanish
+python ../../mls/asr1/local/data_prep.py --lang fr --source ${MLS}/mls_french
+python ../../mls/asr1/local/data_prep.py --lang it --source ${MLS}/mls_italian
+python ../../mls/asr1/local/data_prep.py --lang nl --source ${MLS}/mls_dutch
+python ../../mls/asr1/local/data_prep.py --lang pl --source ${MLS}/mls_polish
+python ../../mls/asr1/local/data_prep.py --lang pt --source ${MLS}/mls_portuguese
 
 log "Successfully finished. [elapsed=${SECONDS}s]"

@@ -7,7 +7,33 @@ set -o pipefail
 
 train_set=train_t
 valid_set=dev_fleurs
-test_sets=test_fleurs
+test_sets="
+test_fleurs
+test_voxpopuli_cs
+test_voxpopuli_de
+test_voxpopuli_en
+test_voxpopuli_es
+test_voxpopuli_et
+test_voxpopuli_fi
+test_voxpopuli_fr
+test_voxpopuli_hr
+test_voxpopuli_hu
+test_voxpopuli_it
+test_voxpopuli_lt
+test_voxpopuli_nl
+test_voxpopuli_pl
+test_voxpopuli_ro
+test_voxpopuli_sk
+test_voxpopuli_sl
+test_mls_de
+test_mls_en
+test_mls_es
+test_mls_fr
+test_mls_it
+test_mls_nl
+test_mls_pl
+test_mls_pt
+"
 
 asr_config=conf/tuning/train_asr_e_branchformer_mms1b-asr_bloomz7b_ctc.yaml
 inference_config=conf/decode_asr_hf.yaml

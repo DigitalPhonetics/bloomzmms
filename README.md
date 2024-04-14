@@ -85,7 +85,9 @@ If you wish to skip training, you can download the pretrained models from the ne
 
 ## Speech Recognition Inference
 
-TBD
+```
+./run.sh --stage 12 --asr_config conf/tuning/train_asr_e_branchformer_mms1b-asr_bloomz7b_aed.yaml
+```
 
 ## Speech Translation Inference
 
