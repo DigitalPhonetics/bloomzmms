@@ -53,7 +53,9 @@ python local/export_hf_embed_tokens.py bigscience/bloomz-7b1 downloads/bloomz_to
 log "Preparing VoxPopuli data"
 
 for lang in cs de en es et fi fr hr hu it lt nl pl ro sk sl; do
-    python local/prepare_voxpopuli.py ${VOXPOPULI}/root/transcriped_data/${lang} data/test_voxpopuli_${lang}
+    python local/prepare_voxpopuli.py \
+        ${VOXPOPULI}/root/transcriped_data/${lang} \
+	data/test_voxpopuli_${lang}
 done
 
 log "Preparing Mutlilingual LibriSpeech data"
@@ -66,5 +68,31 @@ python ../../mls/asr1/local/data_prep.py --lang it --source ${MLS}/mls_italian
 python ../../mls/asr1/local/data_prep.py --lang nl --source ${MLS}/mls_dutch
 python ../../mls/asr1/local/data_prep.py --lang pl --source ${MLS}/mls_polish
 python ../../mls/asr1/local/data_prep.py --lang pt --source ${MLS}/mls_portuguese
+
+log "Preparing CoVoST 2 data"
+
+wget --no-check-certificate https://dl.fbaipublicfiles.com/covost/covost2.zip \
+    -P ${COVOST2}
+unzip ${COVOST2}/covost2.zip -d ${COVOST2}
+rm ${COVOST2}/covost2.zip
+
+for lang in; do
+    ../../../egs/covost2/asr1/local/data_prep_commonvoice.pl \
+        "${COMMONVOICE}/${lang}" validated data/validated.${src_lang}
+done
+
+tgt_lang=en
+
+for src_lang in ar ca cy de es et fa fr id it ja lv mn nl pt ru sl sv-SE ta tr zh-CN; do
+    local/data_prep_covost2.sh ${COVOST2} ${src_lang} ${tgt_lang}
+    mv data/test.${src_lang}-${tgt_lang} data/test_covost2_${src_lang}-${tgt_lang}
+done
+
+src_lang=en
+
+for tgt_lang in ar ca cy de en et fa id ja lv mn sl sv-SE ta tr zh-CN; do
+    local/data_prep_covost2.sh ${COVOST2} ${src_lang} ${tgt_lang}
+    mv data/test.${src_lang}-${tgt_lang} data/test_covost2_${src_lang}-${tgt_lang}
+done
 
 log "Successfully finished. [elapsed=${SECONDS}s]"

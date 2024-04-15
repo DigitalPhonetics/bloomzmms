@@ -86,12 +86,45 @@ If you wish to skip training, you can download the pretrained models from the ne
 ## Speech Recognition Inference
 
 ```
-./run.sh --stage 12 --asr_config conf/tuning/train_asr_e_branchformer_mms1b-asr_bloomz7b_aed.yaml
+./run.sh \
+    --stage 12 \
+    --asr_config conf/tuning/train_asr_e_branchformer_mms1b-asr_bloomz7b_aed.yaml
 ```
 
 ## Speech Translation Inference
 
-TBD
+1. Run the data preparation steps.
+
+For CoVoST 2, run:
+```
+./run.sh \
+    --stage 3 \
+    --stop-stage 3 \
+    --test_sets test_covost2_en-de
+```
+
+For FLEURS, run:
+```
+local/prepare_fleurs_translate.py en-us de-de
+```
+
+2. Generate a config with language-specific instructions:
+```
+perl -p \
+    -e 's/prefix: "Repeat the sentence: "/prefix: "Translate the following text from English to German\\n"/;' \
+    -e 's/postfix: ". "/postfix: "\\n"/;'  -e 's/keep_nbest_models: 3/keep_nbest_models: 1/;' \
+    -e 's/max_epoch: 70/max_epoch: 0/;' \
+        conf/tuning/train_asr_e_branchformer_mms1b-asr_bloomz7b_aed.yaml \
+        > conf/tuning/train_asr_e_branchformer_mms1b-asr_bloomz7b_aed_translate_en-de.yaml
+```
+
+3. Run the model construction and inference stages:
+```
+./run.sh \
+    --stage 11 \
+    --test_sets test_covost2_en-de \
+    --asr_config conf/tuning/train_asr_e_branchformer_mms1b-asr_bloomz7b_aed_translate_en-de.yaml
+```
 
 ## SpeechGLUE Inference
 
