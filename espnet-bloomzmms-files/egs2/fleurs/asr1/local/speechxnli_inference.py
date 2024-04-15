@@ -21,13 +21,13 @@ from transformers.file_utils import ModelOutput
 
 from local.mms_glue import task2list
 
-asr_expdir = sys.argv[1]
-odir = sys.argv[2]
-lang = sys.argv[3]
+xnli_dir = sys.argv[1]
+lang = sys.argv[2]
+asr_expdir = sys.argv[3]
+odir = sys.argv[4]
 
 os.makedirs(odir, exist_ok=True)
 
-xnli_dir = "/mount/arbeitsdaten45/projekte/asr-4/denisopl/xnli"
 sentence2wav = {}
 with open(f"{xnli_dir}/sentences_{lang}.txt", encoding="utf-8") as f:
     i = 0
@@ -40,7 +40,7 @@ with open(f"{xnli_dir}/sentences_{lang}.txt", encoding="utf-8") as f:
 dataset = load_dataset("xnli", lang, split="validation")
 
 asr_train_config = f"{asr_expdir}/config.yaml"
-asr_model_file = f"{asr_expdir}/0epoch.pth"
+asr_model_file = f"{asr_expdir}/valid.acc.ave.pth"
 ngpu = 1
 dtype = "float32"
 

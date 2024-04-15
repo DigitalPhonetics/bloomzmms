@@ -7,7 +7,7 @@
 git clone --branch v.202304 --depth 1 git@github.com:espnet/espnet.git /path/to/espnet-bloomzmms
 ```
 2. Copy the modifications:
-```
+```bash
 rsync -av espnet-bloomzmms-files/ /path/to/espnet-bloomzmms/
 ```
 3. Follow the ESPnet installation instructions.
@@ -15,13 +15,13 @@ rsync -av espnet-bloomzmms-files/ /path/to/espnet-bloomzmms/
 ## Data Preparation
 
 1. Run the data preparation stages:
-```
+```bash
 cd /path/to/espnet-bloomzmms/egs2/fleurs/asr1
 ./run.sh --stop-stage 5
 ```
 
 2. Download the synthetic multi-instractional training targets and create additional training data directories:
-```
+```bash
 wget 'https://zenodo.org/records/10900287/files/tmi_training_targets.tar.gz?download=1' -O downloads/tmi_training_targets.tar.gz
 mkdir downloads/tmi_training_targets
 tar xf downloads/tmi_training_targets.tar.gz -C downloads/tmi_training_targets
@@ -45,7 +45,6 @@ for f in wav.scp utt2spk; do
     done
 done
 utils/fix_data_dir.sh dump/raw/train_mi_sp
-
 ```
 
 ## Training
@@ -55,7 +54,7 @@ necessary to download the pretrained models from the next section to perform tra
 If you wish to skip training, you can download the pretrained models from the next section.
 
 1. CTC pretraining:
-```
+```bash
 ./run.sh \
     --stage 6 \
     --stop-stage 11 \
@@ -63,7 +62,7 @@ If you wish to skip training, you can download the pretrained models from the ne
 ```
 
 2. AED training:
-```
+```bash
 ./run.sh \
     --stage 11 \
     --stop-stage 11 \
@@ -85,7 +84,7 @@ If you wish to skip training, you can download the pretrained models from the ne
 
 ## Speech Recognition Inference
 
-```
+```bash
 ./run.sh \
     --stage 12 \
     --asr_config conf/tuning/train_asr_e_branchformer_mms1b-asr_bloomz7b_aed.yaml
@@ -96,7 +95,7 @@ If you wish to skip training, you can download the pretrained models from the ne
 1. Run the data preparation steps.
 
 For CoVoST 2, run:
-```
+```bash
 ./run.sh \
     --stage 3 \
     --stop-stage 3 \
@@ -104,12 +103,12 @@ For CoVoST 2, run:
 ```
 
 For FLEURS, run:
-```
+```bash
 local/prepare_fleurs_translate.py en-us de-de
 ```
 
 2. Generate a config with language-specific instructions:
-```
+```bash
 perl -p \
     -e 's/prefix: "Repeat the sentence: "/prefix: "Translate the following text from English to German\\n"/;' \
     -e 's/postfix: ". "/postfix: "\\n"/;'  -e 's/keep_nbest_models: 3/keep_nbest_models: 1/;' \
@@ -119,17 +118,52 @@ perl -p \
 ```
 
 3. Run the model construction and inference stages:
-```
+```bash
 ./run.sh \
     --stage 11 \
     --test_sets test_covost2_en-de \
+    --pretrained_model exp/asr_train_asr_e_branchformer_mms1b-asr_bloomz7b_aed_raw_hugging_face_bigscience-bloomz-7b1_sp/valid.acc.ave.pth
     --asr_config conf/tuning/train_asr_e_branchformer_mms1b-asr_bloomz7b_aed_translate_en-de.yaml
 ```
 
 ## SpeechGLUE Inference
 
-TBD
+1. Prepare the SpeechGLUE data: [https://github.com/ashi-ta/speechGLUE?tab=readme-ov-file#data-preparation](https://github.com/ashi-ta/speechGLUE?tab=readme-ov-file#data-preparation).
+
+2. Run the inference script:
+```bash
+mkdir speechglue_output
+
+. path.sh
+
+for task in cola mnli_matched mnli_mismatched mrpc qnli qqp rte sst2 stsb wnli; do
+    local/speechglue_inference.py \
+        /path/to/speechGLUE/dump \
+        ${task} \
+        exp/asr_train_asr_e_branchformer_mms1b-asr_bloomz7b_aed_raw_hugging_face_bigscience-bloomz-7b1_sp \
+        speechglue_output
+done
+```
 
 ## SpeechXNLI Inference
 
-TBD
+1. Download the SpeechXNLI data:
+```bash
+wget https://zenodo.org/records/10900287/files/speech_xnli.tar.gz?download=1 -O speech_xnli.tar.gz
+tar xvf speech_xnli.tar.gz
+```
+
+2. Run the inference script:
+```bash
+mkdir speechxnli_output
+
+. path.sh
+
+for lang in ar bg de el en es fr hi ru sw th tr ur vi zh; do
+    local/speechxnli_inference.py \
+        /path/to/speechXNLI \
+        ${lang} \
+        exp/asr_train_asr_e_branchformer_mms1b-asr_bloomz7b_aed_raw_hugging_face_bigscience-bloomz-7b1_sp \
+        speechxnli_output
+done
+```

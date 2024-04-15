@@ -21,7 +21,10 @@ from transformers.file_utils import ModelOutput
 
 from local.mms_glue import task2list
 
-glue_task = sys.argv[1]
+glue_path = sys.argv[1]
+glue_task = sys.argv[2]
+asr_expdir = sys.argv[3]
+output = sys.argv[4]
 
 task2text = {
     "cola": ["sentence"],
@@ -56,9 +59,8 @@ task2template = {
     "wnli": "10c354ee-6f4e-4b04-91e1-29e999a8f3e7",
 }
 
-asr_expdir = sys.argv[2]
 asr_train_config = f"{asr_expdir}/config.yaml"
-asr_model_file = f"{asr_expdir}/0epoch.pth"
+asr_model_file = f"{asr_expdir}/valid.acc.ave.pth"
 ngpu = 1
 dtype = "float32"
 
@@ -102,9 +104,7 @@ word_embeddings = hugging_face_model.transformer.word_embeddings
 hugging_face_linear_in = decoder.linear_in
 
 speechglue_data = {}
-data = open(
-    f"/mount/arbeitsdaten/asr-3/denisopl/speechGLUE/dump/{glue_task}/validation/data.csv"
-)
+data = open(f"{glue_path}/{glue_task}/validation/data.csv")
 
 for l in csv.DictReader(data):
     speechglue_data[l["idx"]] = l
@@ -203,6 +203,6 @@ for i, l in enumerate(speechglue_data.values()):
 
     hyps.extend(hyp)
 
-json.dump({"refs": refs, "hyps": hyps}, open(f"outputs_speechglue/multiprompt-synth/speechglue_{glue_task}.json", "w"))
+json.dump({"refs": refs, "hyps": hyps}, open(f"{output}/speechglue_{glue_task}.json", "w"))
 
 print("Done")
