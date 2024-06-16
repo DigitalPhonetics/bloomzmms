@@ -1,4 +1,5 @@
 # Teaching a Multilingual Large Language Model to Understand Multilingual Speech via Multi-Instructional Training
+[[Paper]](https://aclanthology.org/2024.findings-naacl.52/)
 
 ## Installation
 
@@ -166,4 +167,23 @@ for lang in ar bg de el en es fr hi ru sw th tr ur vi zh; do
         exp/asr_train_asr_e_branchformer_mms1b-asr_bloomz7b_aed_raw_hugging_face_bigscience-bloomz-7b1_sp \
         speechxnli_output
 done
+```
+
+## Citation
+```
+@inproceedings{denisov-vu-2024-teaching,
+    title = "Teaching a Multilingual Large Language Model to Understand Multilingual Speech via Multi-Instructional Training",
+    author = "Denisov, Pavel  and
+      Vu, Thang",
+    editor = "Duh, Kevin  and
+      Gomez, Helena  and
+      Bethard, Steven",
+    booktitle = "Findings of the Association for Computational Linguistics: NAACL 2024",
+    month = jun,
+    year = "2024",
+    address = "Mexico City, Mexico",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2024.findings-naacl.52",
+    pages = "814--834",
+}
 ```
